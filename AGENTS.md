@@ -64,7 +64,12 @@ git tag vX.Y.Z && git push origin vX.Y.Z
 - Port `8080` is mapped only locally (override file). In prod, Traefik
   terminates TLS; the container maps no ports. No extra ports anywhere.
 - Toolchains (currently Node.js 22 + pnpm via NodeSource/corepack, plus the
-  GitHub CLI via its official apt repo) belong to the image. AI CLIs and other fast-moving tools do NOT: they are installed
+  GitHub CLI via its official apt repo) belong to the image.
+- The login shell is fish. Generic, shareable shell goodies live in the
+  repo's `fish/` directory and are baked into `/etc/fish/` (sourced before
+  any user config) — keep them generic; personal config belongs to each
+  user's own `~/.config/fish` (persisted via `./data/config`). Tools that
+  the shared config references must be installed in the `Dockerfile`. AI CLIs and other fast-moving tools do NOT: they are installed
   at runtime with `npm install -g`, which lands in the persistent `~/.local`
   thanks to `NPM_CONFIG_PREFIX`. Same for `KIMI_CODE_HOME` and `COREPACK_HOME`
   (both redirected into `~/.local/share`). When adding a new user-space tool,

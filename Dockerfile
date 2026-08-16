@@ -52,6 +52,11 @@ ENV KIMI_CODE_HOME=/home/coder/.local/share/kimi-code
 # Keep the corepack (pnpm/yarn) download cache persistent as well.
 ENV COREPACK_HOME=/home/coder/.local/share/corepack
 
+# System-wide fish defaults (generic shell goodies: eza ls, starship,
+# zoxide, fzf, password generators, ...). fish sources /etc/fish BEFORE the
+# per-user config in ~/.config/fish, so users can override everything.
+COPY fish/ /etc/fish/
+
 # Build metadata (passed by the CI workflow; harmless defaults locally).
 ARG VERSION=dev
 ARG GIT_SHA=unknown

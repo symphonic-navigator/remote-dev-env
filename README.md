@@ -192,6 +192,21 @@ A plain `master` push only produces `master`/sha-tagged images (kept green,
 never deployed by watchtower). `version.txt` holds the base version used for
 pre-release tags (`<base>-pre.<run>`); bump it when starting a new milestone.
 
+## Shell: fish with batteries included
+
+The image ships `fish` as the login shell, with a curated system-wide
+default config in `/etc/fish` (source: [`fish/`](fish/) in this repo):
+
+- `ls`/`l`/`la` via `eza --icons`, `clear` incl. scrollback, `v` = `nvim`
+- starship prompt, zoxide (`z`), direnv, fzf key bindings
+- `pw-alpha [n]` / `pw-hex [n]` password generators, `reload` helper
+- tools included: `eza fzf zoxide starship neovim direnv gh node pnpm`
+
+fish sources `/etc/fish` **before** your personal
+`~/.config/fish/config.fish` (persisted via `./data/config`), so every user
+can override or extend everything. Keep the repo's `fish/` generic — no
+personal shortcuts, no machine-specific stuff.
+
 ## Notes
 
 - The container runs as the unprivileged `coder` user, which has passwordless
