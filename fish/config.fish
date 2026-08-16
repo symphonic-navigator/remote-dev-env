@@ -3,6 +3,11 @@
 # via the ./data/config bind mount), so anything here can be overridden or
 # extended per user. Keep this file generic - no personal shortcuts.
 
+# Make user-installed tools (npm -g, Grok Build) reachable no matter how
+# this shell was started - the container ENV already covers VS Code
+# terminals, but not e.g. non-login or stripped environments.
+fish_add_path -g $HOME/.local/bin $HOME/.grok/bin
+
 if status is-interactive
 
     # Prompt & navigation (all guarded - the image ships these tools,
