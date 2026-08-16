@@ -21,6 +21,7 @@ for the plan — do not build roadmap items ahead of schedule.
   - `./workspace` → `/home/coder/workspace` (the user's projects)
   - `./data/config` → `/home/coder/.config`
   - `./data/local` → `/home/coder/.local`
+  - `./data/grok` → `/home/coder/.grok` (Grok Build: binary, login, config)
 - The container must stay disposable: deleting/recreating it must never lose state.
 
 ## Compose file layout
@@ -28,10 +29,14 @@ for the plan — do not build roadmap items ahead of schedule.
 - `docker-compose.yml` — base, no ports (safe everywhere)
 - `docker-compose.override.yml` — local dev, maps `8080:8080`; auto-loaded
   by `docker compose` when no `-f` flags are given
-- `docker-compose.prod.yml` — VPS: Traefik labels (`chris-dev.tidesson.net`,
-  TLS via `letsencrypt`, external network `traefik-proxy`), registry image,
-  watchtower. Always used with explicit `-f` flags, which also suppresses
-  the override file.
+- `docker-compose.prod.yml` — VPS: Traefik labels (TLS via `letsencrypt`,
+  external network `traefik-proxy`), registry image, watchtower. Always
+  used with explicit `-f` flags, which also suppresses the override file.
+- Multi-instance: `INSTANCE_NAME` and `DOMAIN` come from `.env`
+  (gitignored, see `.env.example`) and parameterize project/container name
+  and Traefik router/service/host. Defaults = the original single instance,
+  so `.env` is optional. Each person gets their own checkout + instance —
+  never share one container between people.
 
 ## Commands
 
@@ -64,7 +69,9 @@ git tag vX.Y.Z && git push origin vX.Y.Z
   thanks to `NPM_CONFIG_PREFIX`. Same for `KIMI_CODE_HOME` and `COREPACK_HOME`
   (both redirected into `~/.local/share`). When adding a new user-space tool,
   make sure its data/config lands in `~/.config` or `~/.local` — anything
-  else under `/home/coder` is ephemeral.
+  else under `/home/coder` is ephemeral. Tools that hardcode their own home
+  directory (like Grok Build's `~/.grok`) get their own `./data/*` bind mount
+  instead.
 - Authentication: Argon2 hash in `secrets/hashed_password`, mounted as a
   Compose secret; `entrypoint.sh` reads it and exports `HASHED_PASSWORD`.
   Do NOT pass the hash via Compose `environment:` — Compose interpolates `$`
@@ -79,5 +86,6 @@ git tag vX.Y.Z && git push origin vX.Y.Z
 
 OAuth/SSO, Docker socket access, DinD, mapped dev-port ranges, wildcard DNS,
 further toolchains (Python, Rust, ...), further AI CLIs (Codex), automated
-base-image updates, backups, multi-user.
+base-image updates, backups, multi-user *within* one instance (multi-instance
+per person exists and is the way).
 These are planned — see `ROADMAP.md` — but must not be implemented early.

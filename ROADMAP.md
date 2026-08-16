@@ -44,6 +44,11 @@ packages and is rebuilt via CI when needed.
 - Watchtower auto-deploys releases on the VPS
 - Finding: code-server's built-in `/proxy/<port>/` preview already works
   and is covered by the same login (tested locally)
+- Multi-instance support added: `INSTANCE_NAME`/`DOMAIN` via `.env`
+  (`.env.example`) let several people run isolated instances on one host
+  (e.g. `brita-dev.tidesson.net` next to `chris-dev.tidesson.net`)
+- Grok Build support: `~/.grok` (binary, login, config) persisted via
+  `./data/grok` bind mount; install on demand with the official script
 - Not done (evaluate if needed): fail2ban / rate limiting for the login page
 
 ## MVP 4 — Run what you build: dev servers & ports
@@ -64,6 +69,8 @@ packages and is rebuilt via CI when needed.
 
 ## Explicit non-goals (for now)
 
-- Multi-user support
+- Multi-user *within* one instance (shared container/auth) — several people
+  are served by separate instances instead (see README, "Running several
+  instances")
 - Kubernetes / orchestration beyond Compose
 - IDE alternatives / fleet management

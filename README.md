@@ -58,7 +58,7 @@ variable, so nothing is ever interpolated. `secrets/` is excluded from git.
 ## 2. Build and start
 
 ```bash
-mkdir -p data/config data/local workspace
+mkdir -p data/config data/local data/grok workspace
 docker compose up -d --build
 ```
 
@@ -77,6 +77,17 @@ Inside the IDE terminal (`Terminal → New Terminal`):
 kimi        # Kimi Code CLI — first launch: /login (OAuth or API key)
 opencode    # OpenCode — first launch: opencode auth login
 ```
+
+Grok Build (xAI) is not pre-installed, but fully supported — install it
+once inside the IDE terminal:
+
+```bash
+curl -fsSL https://x.ai/cli/install.sh | bash
+grok        # first launch: grok login (X account / SuperGrok) or API key
+```
+
+Its binary, login and config live under `~/.grok`, which is bind-mounted to
+`./data/grok` — so it survives rebuilds just like everything else.
 
 Update them anytime — no rebuild, no redeploy:
 
@@ -136,6 +147,28 @@ Watchtower is enabled for this service and will deploy new `:latest` images
 automatically. Note that this restarts the container — including open IDE
 sessions and terminal processes. Remove the watchtower label from
 `docker-compose.prod.yml` if you prefer manual updates.
+
+## Running several instances (e.g. for family)
+
+One Docker host can serve several people — each gets their own container,
+state, password and domain. Example: a second instance for
+`brita-dev.tidesson.net` on the same VPS.
+
+On the VPS, next to your own checkout:
+
+```bash
+git clone <repo> remote-dev-env-brita
+cd remote-dev-env-brita
+cp .env.example .env   # set INSTANCE_NAME=brita-dev and DOMAIN=brita-dev.tidesson.net
+# then the usual: secrets/hashed_password, mkdir -p data/config data/local data/grok workspace
+docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+`INSTANCE_NAME` keeps the compose project, container name and Traefik
+router/service names unique; `DOMAIN` sets the Traefik host rule. Both
+default to the original single-instance values, so a lone deployment needs
+no `.env` at all. Each instance updates independently via watchtower.
 
 ## Releasing a new image version
 

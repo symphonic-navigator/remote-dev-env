@@ -1,10 +1,14 @@
-name: remote-dev-env
+# INSTANCE_NAME makes the deployment multi-instance capable: several people
+# can run side by side on one Docker host, each with their own checkout,
+# project/container name, state and (in prod) domain. Set it in .env -
+# see .env.example. Defaults keep a single deployment boring.
+name: ${INSTANCE_NAME:-remote-dev-env}
 
 services:
   code-server:
     build: .
     image: remote-dev-env:latest
-    container_name: remote-dev-env
+    container_name: ${INSTANCE_NAME:-remote-dev-env}
     restart: unless-stopped
     # Ports are environment-specific: docker-compose.override.yml maps
     # 8080 for local use, docker-compose.prod.yml uses Traefik instead.
@@ -12,6 +16,7 @@ services:
       # Persistent state: the container is disposable, these directories are not.
       - ./data/config:/home/coder/.config
       - ./data/local:/home/coder/.local
+      - ./data/grok:/home/coder/.grok
       - ./workspace:/home/coder/workspace
     secrets:
       # The Argon2 hash is mounted as a file, not passed as an env var:

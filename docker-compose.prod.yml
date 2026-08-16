@@ -26,14 +26,15 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-proxy"
 
-      # Router (HTTPS)
-      - "traefik.http.routers.remote-dev-env.rule=Host(`chris-dev.tidesson.net`)"
-      - "traefik.http.routers.remote-dev-env.entrypoints=websecure"
-      - "traefik.http.routers.remote-dev-env.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.remote-dev-env.service=remote-dev-env"
+      # Router (HTTPS). Router/service names are prefixed with INSTANCE_NAME
+      # so several instances can share one Traefik; DOMAIN comes from .env.
+      - "traefik.http.routers.${INSTANCE_NAME:-remote-dev-env}.rule=Host(`${DOMAIN:-chris-dev.tidesson.net}`)"
+      - "traefik.http.routers.${INSTANCE_NAME:-remote-dev-env}.entrypoints=websecure"
+      - "traefik.http.routers.${INSTANCE_NAME:-remote-dev-env}.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.${INSTANCE_NAME:-remote-dev-env}.service=${INSTANCE_NAME:-remote-dev-env}"
 
       # Service -> container port (code-server listens on 8080)
-      - "traefik.http.services.remote-dev-env.loadbalancer.server.port=8080"
+      - "traefik.http.services.${INSTANCE_NAME:-remote-dev-env}.loadbalancer.server.port=8080"
 
       # watchtower
       - "com.centurylinklabs.watchtower.enable=true"

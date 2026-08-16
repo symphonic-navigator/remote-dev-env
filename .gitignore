@@ -2,6 +2,9 @@
 secrets/*
 !secrets/hashed_password.example
 
+# Per-instance configuration (INSTANCE_NAME / DOMAIN)
+.env
+
 # Persistent container state (code-server config, extensions, user binaries)
 data/
 
