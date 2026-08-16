@@ -7,8 +7,9 @@ Guidance for AI coding agents (Kimi Code, OpenCode, Codex, ...) working in this 
 A personal, browser-based remote development workstation: code-server
 (VS Code in the browser) in Docker Compose. Currently at **MVP 3**
 (foundation + persistence + Node.js/pnpm + AI CLIs + VPS deployment behind
-Traefik with CI-built images). See `README.md` for usage and `ROADMAP.md`
-for the plan — do not build roadmap items ahead of schedule.
+Traefik with CI-built images). See `README.md` for usage (operator-facing;
+end users get `MANUAL.md`) and `ROADMAP.md` for the plan — do not build
+roadmap items ahead of schedule.
 
 ## Core architectural rule
 

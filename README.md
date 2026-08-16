@@ -9,6 +9,9 @@ AI coding CLIs) plus VPS deployment behind Traefik with TLS and CI-built,
 release-tagged images. See [ROADMAP.md](ROADMAP.md) for what comes next
 (dev-port handling, backups, ...).
 
+**Using the environment as an end user?** Read [MANUAL.md](MANUAL.md) —
+everything below is for the deployer/operator.
+
 ## Architecture
 
 ```
