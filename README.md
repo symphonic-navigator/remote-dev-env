@@ -4,10 +4,10 @@ Browser-based remote development workstation: VS Code (code-server) in Docker,
 with persistent state. The container is disposable — your code, settings,
 extensions and user-installed tools are not.
 
-This is **MVP 2**: IDE in the browser + persistence + authentication +
-Node.js/pnpm + AI coding CLIs (Kimi Code, OpenCode) in the IDE terminal.
-See [ROADMAP.md](ROADMAP.md) for what comes next (VPS deployment with TLS,
-dev-port handling, CI/CD, ...).
+This is **MVP 3**: MVP 2 (IDE in the browser + persistence + Node.js/pnpm +
+AI coding CLIs) plus VPS deployment behind Traefik with TLS and CI-built,
+release-tagged images. See [ROADMAP.md](ROADMAP.md) for what comes next
+(dev-port handling, backups, ...).
 
 ## Architecture
 
@@ -110,6 +110,47 @@ docker compose up -d
 3. Open <http://localhost:8080> again: the file and the setting are still
    there. (On the host they live in `workspace/test.txt` and `data/config/`.)
 
+## Deploying to the VPS
+
+The VPS runs Traefik (entrypoint `websecure`, certresolver `letsencrypt`,
+external network `traefik-proxy`) — same setup as the other services there.
+The IDE is served at <https://chris-dev.tidesson.net>.
+
+One-time setup on the VPS:
+
+1. DNS A/AAAA record for `chris-dev.tidesson.net` → the VPS.
+2. Clone this repo, then do steps 1–2 from above (`secrets/hashed_password`,
+   `mkdir -p data/config data/local workspace`).
+3. Let the VPS pull from ghcr.io: either set the package
+   `symphonic-navigator/remote-dev-env` to public, or
+   `docker login ghcr.io` with a PAT (`read:packages`).
+
+Deploy / update:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+Watchtower is enabled for this service and will deploy new `:latest` images
+automatically. Note that this restarts the container — including open IDE
+sessions and terminal processes. Remove the watchtower label from
+`docker-compose.prod.yml` if you prefer manual updates.
+
+## Releasing a new image version
+
+GitHub Actions (`.github/workflows/docker.yml`) builds and pushes the image
+to `ghcr.io/symphonic-navigator/remote-dev-env` on every push to `master`
+and on tags. `latest` moves **only** on release tags:
+
+```bash
+git tag v0.3.1 && git push origin v0.3.1   # release: latest + semver tags
+```
+
+A plain `master` push only produces `master`/sha-tagged images (kept green,
+never deployed by watchtower). `version.txt` holds the base version used for
+pre-release tags (`<base>-pre.<run>`); bump it when starting a new milestone.
+
 ## Notes
 
 - The container runs as the unprivileged `coder` user, which has passwordless
@@ -117,5 +158,6 @@ docker compose up -d
   installed with `sudo apt install` is **ephemeral** and gone after the next
   image rebuild. Proven tools belong in the `Dockerfile`, fast-moving user
   tools belong in the persistent home (`npm install -g ...`).
-- Only port `8080` is exposed. No TLS, no reverse proxy, no public exposure —
-  do not expose this port to the internet as-is.
+- Locally only port `8080` is exposed (`docker-compose.override.yml`) — do
+  not expose it to the internet as-is. On the VPS, TLS is handled by Traefik
+  (`docker-compose.prod.yml`) and no port is mapped at all.
