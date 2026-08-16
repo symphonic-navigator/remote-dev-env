@@ -1,0 +1,31 @@
+name: remote-dev-env
+
+services:
+  code-server:
+    build: .
+    image: remote-dev-env:latest
+    container_name: remote-dev-env
+    restart: unless-stopped
+    # Ports are environment-specific: docker-compose.override.yml maps
+    # 8080 for local use, docker-compose.prod.yml uses Traefik instead.
+    volumes:
+      # Persistent state: the container is disposable, these directories are not.
+      - ./data/config:/home/coder/.config
+      - ./data/local:/home/coder/.local
+      - ./workspace:/home/coder/workspace
+    secrets:
+      # The Argon2 hash is mounted as a file, not passed as an env var:
+      # Compose interpolates '$' in environment values, which would mangle
+      # Argon2 hashes. File contents are used literally - no escaping needed.
+      # entrypoint.sh reads it and exports HASHED_PASSWORD for code-server.
+      - hashed_password
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+secrets:
+  hashed_password:
+    file: ./secrets/hashed_password

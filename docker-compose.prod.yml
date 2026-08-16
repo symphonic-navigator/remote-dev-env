@@ -1,0 +1,45 @@
+# Production override for the VPS: Traefik (TLS via Let's Encrypt) instead
+# of a mapped port. Load EXPLICITLY - this also prevents the automatic
+# loading of docker-compose.override.yml:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Prerequisites on the VPS:
+#   - Traefik running with an entrypoint "websecure", a certresolver named
+#     "letsencrypt" and an external network "traefik-proxy" (same setup as
+#     the other services on this host)
+#   - DNS A/AAAA record for chris-dev.tidesson.net pointing to the VPS
+#   - ghcr.io login (or the package set to public) so the image can be pulled
+#
+# The image is NOT built here - it is pulled from ghcr.io, built by GitHub
+# Actions (see .github/workflows/docker.yml). `:latest` only moves on
+# v*.*.* release tags, and watchtower picks up new releases automatically.
+# Note: a watchtower update restarts the container - including open IDE
+# sessions and terminal processes. Remove the watchtower label if you
+# prefer to update manually at a quiet moment.
+
+services:
+  code-server:
+    image: ghcr.io/symphonic-navigator/remote-dev-env:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-proxy"
+
+      # Router (HTTPS)
+      - "traefik.http.routers.remote-dev-env.rule=Host(`chris-dev.tidesson.net`)"
+      - "traefik.http.routers.remote-dev-env.entrypoints=websecure"
+      - "traefik.http.routers.remote-dev-env.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.remote-dev-env.service=remote-dev-env"
+
+      # Service -> container port (code-server listens on 8080)
+      - "traefik.http.services.remote-dev-env.loadbalancer.server.port=8080"
+
+      # watchtower
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - traefik-proxy
+
+networks:
+  traefik-proxy:
+    external: true

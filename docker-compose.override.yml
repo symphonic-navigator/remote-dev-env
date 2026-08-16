@@ -1,0 +1,6 @@
+# Local development defaults - loaded AUTOMATICALLY by `docker compose`
+# (only when no explicit -f flags are given). Not used on the VPS.
+services:
+  code-server:
+    ports:
+      - "8080:8080"

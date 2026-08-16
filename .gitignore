@@ -1,0 +1,13 @@
+# Secrets - never commit real credentials
+secrets/*
+!secrets/hashed_password.example
+
+# Persistent container state (code-server config, extensions, user binaries)
+data/
+
+# Workspace holds your actual projects - keep them out of this repo
+workspace/*
+!workspace/.gitkeep
+
+# OS / editor noise
+.DS_Store
