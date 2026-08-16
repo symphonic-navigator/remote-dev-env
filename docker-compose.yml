@@ -17,6 +17,8 @@ services:
       - ./data/config:/home/coder/.config
       - ./data/local:/home/coder/.local
       - ./data/grok:/home/coder/.grok
+      - ./data/claude:/home/coder/.claude
+      - ./data/codex:/home/coder/.codex
       - ./workspace:/home/coder/workspace
     secrets:
       # The Argon2 hash is mounted as a file, not passed as an env var:

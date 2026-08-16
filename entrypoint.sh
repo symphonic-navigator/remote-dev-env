@@ -18,4 +18,8 @@ fi
 HASHED_PASSWORD="$(cat "$SECRET_FILE")"
 export HASHED_PASSWORD
 
+# GIT_CONFIG_GLOBAL points here (see Dockerfile); git does not create
+# parent directories itself.
+mkdir -p /home/coder/.config/git
+
 exec /usr/bin/entrypoint.sh --bind-addr 0.0.0.0:8080 /home/coder/workspace

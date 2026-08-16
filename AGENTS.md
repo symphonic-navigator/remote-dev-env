@@ -22,6 +22,8 @@ for the plan — do not build roadmap items ahead of schedule.
   - `./data/config` → `/home/coder/.config`
   - `./data/local` → `/home/coder/.local`
   - `./data/grok` → `/home/coder/.grok` (Grok Build: binary, login, config)
+  - `./data/claude` → `/home/coder/.claude` (Claude Code)
+  - `./data/codex` → `/home/coder/.codex` (Codex CLI)
 - The container must stay disposable: deleting/recreating it must never lose state.
 
 ## Compose file layout
@@ -90,7 +92,7 @@ git tag vX.Y.Z && git push origin vX.Y.Z
 ## Explicit non-goals for the current state
 
 OAuth/SSO, Docker socket access, DinD, mapped dev-port ranges, wildcard DNS,
-further toolchains (Python, Rust, ...), further AI CLIs (Codex), automated
-base-image updates, backups, multi-user *within* one instance (multi-instance
-per person exists and is the way).
+further toolchains (Python, Rust, ...), automated base-image updates,
+backups, multi-user *within* one instance (multi-instance per person exists
+and is the way).
 These are planned — see `ROADMAP.md` — but must not be implemented early.

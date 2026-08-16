@@ -19,6 +19,8 @@ OS + system packages           ./data/config    → /home/coder/.config
 Node.js 22 + pnpm + gh         ./data/local     → /home/coder/.local
                                (npm -g tools, AI CLIs, their data)
                                ./data/grok      → /home/coder/.grok (Grok Build)
+                               ./data/claude    → /home/coder/.claude (Claude Code)
+                               ./data/codex     → /home/coder/.codex (Codex CLI)
 ```
 
 npm/pnpm global installs are redirected to `~/.local` (`NPM_CONFIG_PREFIX`),
@@ -59,7 +61,7 @@ variable, so nothing is ever interpolated. `secrets/` is excluded from git.
 ## 2. Build and start
 
 ```bash
-mkdir -p data/config data/local data/grok workspace
+mkdir -p data/config data/local data/grok data/claude data/codex workspace
 docker compose up -d --build
 ```
 
@@ -90,6 +92,19 @@ grok        # first launch: grok login (X account / SuperGrok) or API key
 Its binary, login and config live under `~/.grok`, which is bind-mounted to
 `./data/grok` — so it survives rebuilds just like everything else.
 
+Claude Code and Codex CLI work the same way — install on demand:
+
+```bash
+npm install -g @anthropic-ai/claude-code
+npm install -g @openai/codex
+```
+
+Their data directories `~/.claude` and `~/.codex` are bind-mounted to
+`./data/claude` and `./data/codex`, so logins and sessions persist.
+(Note: Claude Code's `~/.claude.json` state file lives outside the mount
+and resets on container recreation — credentials inside `~/.claude/` are
+what matter, and those persist.)
+
 Update them anytime — no rebuild, no redeploy:
 
 ```bash
@@ -97,7 +112,40 @@ npm install -g @moonshot-ai/kimi-code@latest
 npm install -g opencode-ai@latest
 ```
 
-## 5. Operate
+## 5. Git and GitHub
+
+One-time setup per instance, inside the IDE terminal:
+
+```bash
+gh auth login        # authenticate with GitHub (token persists in ~/.config/gh)
+gh auth setup-git    # register gh as git's credential helper
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+```
+
+All of this persists across rebuilds: the gh token lives in `~/.config/gh`
+and the global git config is redirected to `~/.config/git/config`
+(`GIT_CONFIG_GLOBAL`) — both are on the `./data/config` bind mount.
+
+**Clone via HTTPS**, then git operations work without any SSH keys:
+
+```bash
+gh repo clone user/repo                              # or:
+git clone https://github.com/user/repo.git
+```
+
+Notes:
+
+- `gh auth setup-git` and the identity are **global** — run them once per
+  instance, not per repo.
+- If a repo was previously cloned with an SSH remote (`git@github.com:...`),
+  either switch it once (`git remote set-url origin https://github.com/...`)
+  or set up a one-time global rewrite:
+  `git config --global url."https://github.com/".insteadOf git@github.com:`
+- SSH keys are intentionally not used: `~/.ssh` is **not** persisted and
+  would be lost on every container recreation.
+
+## 6. Operate
 
 ```bash
 docker compose ps        # status incl. health check
@@ -106,7 +154,7 @@ docker compose down      # stop (state persists)
 docker compose up -d     # start again
 ```
 
-## 6. Rebuild the image
+## 7. Rebuild the image
 
 ```bash
 docker compose down
@@ -114,11 +162,11 @@ docker compose build --no-cache
 docker compose up -d
 ```
 
-## 7. Verify persistence
+## 8. Verify persistence
 
 1. In the IDE, create `/home/coder/workspace/test.txt` and change a setting
    (e.g. the color theme).
-2. Run the rebuild from step 6.
+2. Run the rebuild from step 7.
 3. Open <http://localhost:8080> again: the file and the setting are still
    there. (On the host they live in `workspace/test.txt` and `data/config/`.)
 
@@ -133,7 +181,7 @@ One-time setup on the VPS:
 1. DNS: wildcard A/AAAA record for `*.dev.tidesson.net` → the VPS (one
    record covers all current and future instances).
 2. Clone this repo, then do steps 1–2 from above (`secrets/hashed_password`,
-   `mkdir -p data/config data/local data/grok workspace`).
+   `mkdir -p data/config data/local data/grok data/claude data/codex workspace`).
    **Important on a root-login VPS:** the container runs as UID 1000, so the
    state directories must belong to it — otherwise code-server fails at
    startup with `EACCES: permission denied, mkdir '/home/coder/.config/...'`:
@@ -168,7 +216,7 @@ On the VPS, next to your own checkout:
 git clone <repo> remote-dev-env-brita
 cd remote-dev-env-brita
 cp .env.example .env   # set INSTANCE_NAME=brita-dev and DOMAIN=brita.dev.tidesson.net
-# then the usual: secrets/hashed_password, mkdir -p data/config data/local data/grok workspace
+# then the usual: secrets/hashed_password, mkdir -p data/config data/local data/grok data/claude data/codex workspace
 docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```

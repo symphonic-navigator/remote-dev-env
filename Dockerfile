@@ -52,6 +52,10 @@ ENV KIMI_CODE_HOME=/home/coder/.local/share/kimi-code
 # Keep the corepack (pnpm/yarn) download cache persistent as well.
 ENV COREPACK_HOME=/home/coder/.local/share/corepack
 
+# Move the global git config into the persistent ~/.config tree, so
+# credential helpers (gh auth setup-git), identity etc. survive rebuilds.
+ENV GIT_CONFIG_GLOBAL=/home/coder/.config/git/config
+
 # System-wide fish defaults (generic shell goodies: eza ls, starship,
 # zoxide, fzf, password generators, ...). fish sources /etc/fish BEFORE the
 # per-user config in ~/.config/fish, so users can override everything.
