@@ -33,7 +33,7 @@ packages and is rebuilt via CI when needed.
 
 ## MVP 3 — Reachable from anywhere: VPS deployment (done)
 
-- `docker-compose.prod.yml`: Traefik labels for `chris-dev.tidesson.net`,
+- `docker-compose.prod.yml`: Traefik labels for `chris.dev.tidesson.net`,
   TLS via Let's Encrypt, external network `traefik-proxy` — reuses the
   existing VPS Traefik setup; no mapped ports in prod
 - Local port mapping moved to `docker-compose.override.yml` (auto-loaded
@@ -46,7 +46,7 @@ packages and is rebuilt via CI when needed.
   and is covered by the same login (tested locally)
 - Multi-instance support added: `INSTANCE_NAME`/`DOMAIN` via `.env`
   (`.env.example`) let several people run isolated instances on one host
-  (e.g. `brita-dev.tidesson.net` next to `chris-dev.tidesson.net`)
+  (e.g. `brita.dev.tidesson.net` next to `chris.dev.tidesson.net`)
 - Grok Build support: `~/.grok` (binary, login, config) persisted via
   `./data/grok` bind mount; install on demand with the official script
 - Not done (evaluate if needed): fail2ban / rate limiting for the login page

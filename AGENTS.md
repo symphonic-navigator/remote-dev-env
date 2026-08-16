@@ -63,8 +63,8 @@ git tag vX.Y.Z && git push origin vX.Y.Z
   but `apt` installs are ephemeral; proven system packages go into the `Dockerfile`.
 - Port `8080` is mapped only locally (override file). In prod, Traefik
   terminates TLS; the container maps no ports. No extra ports anywhere.
-- Toolchains (currently Node.js 22 + pnpm via NodeSource/corepack) belong to
-  the image. AI CLIs and other fast-moving tools do NOT: they are installed
+- Toolchains (currently Node.js 22 + pnpm via NodeSource/corepack, plus the
+  GitHub CLI via its official apt repo) belong to the image. AI CLIs and other fast-moving tools do NOT: they are installed
   at runtime with `npm install -g`, which lands in the persistent `~/.local`
   thanks to `NPM_CONFIG_PREFIX`. Same for `KIMI_CODE_HOME` and `COREPACK_HOME`
   (both redirected into `~/.local/share`). When adding a new user-space tool,

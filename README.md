@@ -16,8 +16,9 @@ IMAGE (rebuild anytime)        STATE (survives rebuilds)
 ───────────────────────        ─────────────────────────
 code-server                    ./workspace      → /home/coder/workspace
 OS + system packages           ./data/config    → /home/coder/.config
-Node.js 22 + pnpm              ./data/local     → /home/coder/.local
+Node.js 22 + pnpm + gh         ./data/local     → /home/coder/.local
                                (npm -g tools, AI CLIs, their data)
+                               ./data/grok      → /home/coder/.grok (Grok Build)
 ```
 
 npm/pnpm global installs are redirected to `~/.local` (`NPM_CONFIG_PREFIX`),
@@ -125,13 +126,20 @@ docker compose up -d
 
 The VPS runs Traefik (entrypoint `websecure`, certresolver `letsencrypt`,
 external network `traefik-proxy`) — same setup as the other services there.
-The IDE is served at <https://chris-dev.tidesson.net>.
+The IDE is served at <https://chris.dev.tidesson.net>.
 
 One-time setup on the VPS:
 
-1. DNS A/AAAA record for `chris-dev.tidesson.net` → the VPS.
+1. DNS: wildcard A/AAAA record for `*.dev.tidesson.net` → the VPS (one
+   record covers all current and future instances).
 2. Clone this repo, then do steps 1–2 from above (`secrets/hashed_password`,
-   `mkdir -p data/config data/local workspace`).
+   `mkdir -p data/config data/local data/grok workspace`).
+   **Important on a root-login VPS:** the container runs as UID 1000, so the
+   state directories must belong to it — otherwise code-server fails at
+   startup with `EACCES: permission denied, mkdir '/home/coder/.config/...'`:
+   ```bash
+   sudo chown -R 1000:1000 data workspace
+   ```
 3. Let the VPS pull from ghcr.io: either set the package
    `symphonic-navigator/remote-dev-env` to public, or
    `docker login ghcr.io` with a PAT (`read:packages`).
@@ -152,14 +160,14 @@ sessions and terminal processes. Remove the watchtower label from
 
 One Docker host can serve several people — each gets their own container,
 state, password and domain. Example: a second instance for
-`brita-dev.tidesson.net` on the same VPS.
+`brita.dev.tidesson.net` on the same VPS.
 
 On the VPS, next to your own checkout:
 
 ```bash
 git clone <repo> remote-dev-env-brita
 cd remote-dev-env-brita
-cp .env.example .env   # set INSTANCE_NAME=brita-dev and DOMAIN=brita-dev.tidesson.net
+cp .env.example .env   # set INSTANCE_NAME=brita-dev and DOMAIN=brita.dev.tidesson.net
 # then the usual: secrets/hashed_password, mkdir -p data/config data/local data/grok workspace
 docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d

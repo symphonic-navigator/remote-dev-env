@@ -9,7 +9,7 @@
 #   - Traefik running with an entrypoint "websecure", a certresolver named
 #     "letsencrypt" and an external network "traefik-proxy" (same setup as
 #     the other services on this host)
-#   - DNS A/AAAA record for chris-dev.tidesson.net pointing to the VPS
+#   - DNS: wildcard A/AAAA record for *.dev.tidesson.net pointing to the VPS
 #   - ghcr.io login (or the package set to public) so the image can be pulled
 #
 # The image is NOT built here - it is pulled from ghcr.io, built by GitHub
@@ -28,7 +28,7 @@ services:
 
       # Router (HTTPS). Router/service names are prefixed with INSTANCE_NAME
       # so several instances can share one Traefik; DOMAIN comes from .env.
-      - "traefik.http.routers.${INSTANCE_NAME:-remote-dev-env}.rule=Host(`${DOMAIN:-chris-dev.tidesson.net}`)"
+      - "traefik.http.routers.${INSTANCE_NAME:-remote-dev-env}.rule=Host(`${DOMAIN:-chris.dev.tidesson.net}`)"
       - "traefik.http.routers.${INSTANCE_NAME:-remote-dev-env}.entrypoints=websecure"
       - "traefik.http.routers.${INSTANCE_NAME:-remote-dev-env}.tls.certresolver=letsencrypt"
       - "traefik.http.routers.${INSTANCE_NAME:-remote-dev-env}.service=${INSTANCE_NAME:-remote-dev-env}"
