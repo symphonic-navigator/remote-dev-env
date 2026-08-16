@@ -5,10 +5,13 @@
 FROM codercom/code-server:latest
 
 # curl is needed for the container health check (/healthz).
+# fish is the default login shell of the coder user (its config lives in
+# ~/.config/fish, which is persisted via the ./data/config bind mount).
 USER root
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y --no-install-recommends curl fish \
+    && rm -rf /var/lib/apt/lists/* \
+    && chsh -s "$(command -v fish)" coder
 
 # Node.js 22 LTS via NodeSource (>= 22.19 is required by the AI CLIs)
 # + pnpm via corepack (bundled with Node).
@@ -27,6 +30,13 @@ RUN mkdir -p -m 755 /etc/apt/keyrings \
         > /etc/apt/sources.list.d/github-cli.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends gh \
+    && rm -rf /var/lib/apt/lists/*
+
+# CLI tools referenced by the user's shell config (fish functions/conf.d):
+# eza (ls), starship (prompt), zoxide (cd), fzf, direnv, neovim (editor).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        eza fzf zoxide starship neovim direnv \
     && rm -rf /var/lib/apt/lists/*
 
 # npm global installs land in the persistent home (~/.local is a bind mount),
