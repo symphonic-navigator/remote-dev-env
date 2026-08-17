@@ -20,7 +20,7 @@ IMAGE (rebuild anytime)        STATE (survives rebuilds)
 code-server                    ./workspace      → /home/coder/workspace
 OS + system packages           ./data/config    → /home/coder/.config
 Node.js 22 + pnpm + gh         ./data/local     → /home/coder/.local
-                               (npm -g tools, AI CLIs, their data)
+Python 3 + pip/venv/pipx + uv  (npm -g tools, AI CLIs, their data)
                                ./data/grok      → /home/coder/.grok (Grok Build)
                                ./data/claude    → /home/coder/.claude (Claude Code)
                                ./data/codex     → /home/coder/.codex (Codex CLI)
@@ -236,12 +236,15 @@ to `ghcr.io/symphonic-navigator/remote-dev-env` on every push to `master`
 and on tags. `latest` moves **only** on release tags:
 
 ```bash
-git tag v0.3.1 && git push origin v0.3.1   # release: latest + semver tags
+./update-version.sh 0.3.1   # bumps version.txt, tags v0.3.1, pushes: latest + semver tags
 ```
+
+The script refuses to run with a dirty working tree or a version whose tag
+already exists. It commits the `version.txt` bump itself before tagging.
 
 A plain `master` push only produces `master`/sha-tagged images (kept green,
 never deployed by watchtower). `version.txt` holds the base version used for
-pre-release tags (`<base>-pre.<run>`); bump it when starting a new milestone.
+pre-release tags (`<base>-pre.<run>`) — the release script keeps it current.
 
 ## Shell: fish with batteries included
 
@@ -251,7 +254,7 @@ default config in `/etc/fish` (source: [`fish/`](fish/) in this repo):
 - `ls`/`l`/`la` via `eza --icons`, `clear` incl. scrollback, `v` = `nvim`
 - starship prompt, zoxide (`z`), direnv, fzf key bindings
 - `pw-alpha [n]` / `pw-hex [n]` password generators, `reload` helper
-- tools included: `eza fzf zoxide starship neovim direnv gh node pnpm`
+- tools included: `eza fzf zoxide starship neovim direnv gh node pnpm python3 pipx uv`
 
 fish sources `/etc/fish` **before** your personal
 `~/.config/fish/config.fish` (persisted via `./data/config`), so every user
@@ -268,3 +271,6 @@ personal shortcuts, no machine-specific stuff.
 - Locally only port `8080` is exposed (`docker-compose.override.yml`) — do
   not expose it to the internet as-is. On the VPS, TLS is handled by Traefik
   (`docker-compose.prod.yml`) and no port is mapped at all.
+- Brute-forcing the login is not practical: code-server itself rate-limits
+  password attempts to 2 per minute + 12 per hour. fail2ban or an extra
+  Traefik rate limit was evaluated and deliberately skipped (see ROADMAP.md).

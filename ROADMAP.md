@@ -49,7 +49,11 @@ packages and is rebuilt via CI when needed.
   (e.g. `brita.dev.tidesson.net` next to `chris.dev.tidesson.net`)
 - Grok Build support: `~/.grok` (binary, login, config) persisted via
   `./data/grok` bind mount; install on demand with the official script
-- Not done (evaluate if needed): fail2ban / rate limiting for the login page
+- Python toolchain in the image (user request): python3 + pip + venv +
+  pipx via apt, uv via the Astral installer — system level, like Node.js
+- Decided against fail2ban / extra rate limiting for the login page:
+  code-server itself rate-limits password attempts to 2/minute + 12/hour,
+  which is sufficient for personal instances
 
 ## MVP 4 — Run what you build: dev servers & ports
 

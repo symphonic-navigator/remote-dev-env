@@ -55,8 +55,8 @@ docker compose build --no-cache && docker compose up -d   # clean rebuild
 docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
-# release (moves :latest, watchtower deploys it)
-git tag vX.Y.Z && git push origin vX.Y.Z
+# release (bumps version.txt, tags vX.Y.Z, pushes; CI builds, watchtower deploys)
+./update-version.sh X.Y.Z
 ```
 
 ## Conventions
@@ -66,8 +66,9 @@ git tag vX.Y.Z && git push origin vX.Y.Z
   but `apt` installs are ephemeral; proven system packages go into the `Dockerfile`.
 - Port `8080` is mapped only locally (override file). In prod, Traefik
   terminates TLS; the container maps no ports. No extra ports anywhere.
-- Toolchains (currently Node.js 22 + pnpm via NodeSource/corepack, plus the
-  GitHub CLI via its official apt repo) belong to the image.
+- Toolchains (currently Node.js 22 + pnpm via NodeSource/corepack, the
+  GitHub CLI via its official apt repo, and Python 3 + pip/venv/pipx via
+  apt + uv via the Astral installer) belong to the image.
 - The login shell is fish. Generic, shareable shell goodies live in the
   repo's `fish/` directory and are baked into `/etc/fish/` (sourced before
   any user config) — keep them generic; personal config belongs to each
@@ -93,7 +94,7 @@ git tag vX.Y.Z && git push origin vX.Y.Z
 ## Explicit non-goals for the current state
 
 OAuth/SSO, Docker socket access, DinD, mapped dev-port ranges, wildcard DNS,
-further toolchains (Python, Rust, ...), automated base-image updates,
+further toolchains (Rust, ...), automated base-image updates,
 backups, multi-user *within* one instance (multi-instance per person exists
 and is the way).
 These are planned — see `ROADMAP.md` — but must not be implemented early.

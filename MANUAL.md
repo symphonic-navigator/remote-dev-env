@@ -15,7 +15,7 @@ What's inside:
 
 - VS Code in the browser, with your files, settings and extensions
 - A Linux terminal with a comfy shell (fish, see below)
-- Git + the GitHub CLI (`gh`), Node.js 22 + pnpm
+- Git + the GitHub CLI (`gh`), Node.js 22 + pnpm, Python 3 (pip, venv, pipx, uv)
 - The popular AI coding CLIs (Kimi Code, OpenCode, Grok, Claude Code, Codex)
 
 The important mental model: **the container is disposable, your state is
@@ -90,6 +90,23 @@ Notes:
   `git remote set-url origin https://github.com/user/repo.git`
   — or set a global rewrite once:
   `git config --global url."https://github.com/".insteadOf git@github.com:`
+
+## Python
+
+Python 3 is pre-installed, including `pip`, `venv`, `pipx` and `uv`.
+System-wide `pip install` is deliberately blocked — that's normal. Instead:
+
+```fish
+# projects: one virtualenv per project
+python3 -m venv .venv
+source .venv/bin/activate.fish
+pip install -r requirements.txt
+
+# CLI tools (e.g. httpie, ruff): isolated, land in your persistent ~/.local
+pipx install ruff
+
+# uv does both, faster (uv venv / uv pip / uv tool install)
+```
 
 ## AI coding CLIs
 

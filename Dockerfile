@@ -39,6 +39,17 @@ RUN apt-get update \
         eza fzf zoxide starship neovim direnv \
     && rm -rf /var/lib/apt/lists/*
 
+# Python toolchain: python3 + pip + venv + pipx from apt (Debian blocks
+# system-wide pip installs per PEP 668 - venv for projects, pipx for CLI
+# tools; pipx defaults land in the persistent ~/.local tree). uv is not in
+# the Debian repos, so it comes from the official Astral installer.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        python3 python3-pip python3-venv pipx \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -LsSf https://astral.sh/uv/install.sh \
+        | env UV_INSTALL_DIR=/usr/local/bin UV_NO_MODIFY_PATH=1 sh
+
 # npm global installs land in the persistent home (~/.local is a bind mount),
 # so user-installed tools (Kimi Code, OpenCode, ...) survive image rebuilds
 # and can be updated with plain npm/pnpm - no redeploy needed.
