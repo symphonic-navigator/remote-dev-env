@@ -15,7 +15,8 @@ What's inside:
 
 - VS Code in the browser, with your files, settings and extensions
 - A Linux terminal with a comfy shell (fish, see below)
-- Git + the GitHub CLI (`gh`), Node.js 22 + pnpm, Python 3 (pip, venv, pipx, uv)
+- Git + the GitHub CLI (`gh`), Node.js 22 + pnpm, Python 3 (pip, venv, pipx, uv),
+  the .NET 10 SDK (`dotnet`)
 - The popular AI coding CLIs (Kimi Code, OpenCode, Grok, Claude Code, Codex)
 
 The important mental model: **the container is disposable, your state is

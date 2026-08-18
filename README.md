@@ -21,7 +21,7 @@ code-server                    ./workspace      → /home/coder/workspace
 OS + system packages           ./data/config    → /home/coder/.config
 Node.js 22 + pnpm + gh         ./data/local     → /home/coder/.local
 Python 3 + pip/venv/pipx + uv  (npm -g tools, AI CLIs, their data)
-                               ./data/grok      → /home/coder/.grok (Grok Build)
+.NET 10 SDK (dotnet)            ./data/grok      → /home/coder/.grok (Grok Build)
                                ./data/claude    → /home/coder/.claude (Claude Code)
                                ./data/codex     → /home/coder/.codex (Codex CLI)
 ```
@@ -30,7 +30,9 @@ npm/pnpm global installs are redirected to `~/.local` (`NPM_CONFIG_PREFIX`),
 so anything installed with `npm install -g` inside the IDE terminal lands on
 the persistent host directory — including updates. Kimi Code's data directory
 is moved to `~/.local/share/kimi-code` (`KIMI_CODE_HOME`); OpenCode already
-uses `~/.config` and `~/.local/share` on its own.
+uses `~/.config` and `~/.local/share` on its own. The same applies to .NET:
+CLI state, global `dotnet tool`s and the NuGet cache are redirected into
+`~/.local/share` (`DOTNET_CLI_HOME`, `NUGET_PACKAGES`).
 
 Because `data/` and `workspace/` are plain host directories, backup is
 just `tar`, and inspection is just `ls`.
@@ -254,7 +256,7 @@ default config in `/etc/fish` (source: [`fish/`](fish/) in this repo):
 - `ls`/`l`/`la` via `eza --icons`, `clear` incl. scrollback, `v` = `nvim`
 - starship prompt, zoxide (`z`), direnv, fzf key bindings
 - `pw-alpha [n]` / `pw-hex [n]` password generators, `reload` helper
-- tools included: `eza fzf zoxide starship neovim direnv gh node pnpm python3 pipx uv`
+- tools included: `eza fzf zoxide starship neovim direnv gh node pnpm python3 pipx uv dotnet`
 
 fish sources `/etc/fish` **before** your personal
 `~/.config/fish/config.fish` (persisted via `./data/config`), so every user

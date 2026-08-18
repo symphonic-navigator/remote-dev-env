@@ -51,12 +51,16 @@ packages and is rebuilt via CI when needed.
   `./data/grok` bind mount; install on demand with the official script
 - Python toolchain in the image (user request): python3 + pip + venv +
   pipx via apt, uv via the Astral installer — system level, like Node.js
+- .NET 10 SDK in the image (customer requirement): `dotnet-sdk-10.0` via
+  Microsoft's apt feed — system level, like Node.js/Python; CLI state,
+  global tools and the NuGet cache redirected into persistent `~/.local`
+  (`DOTNET_CLI_HOME`, `NUGET_PACKAGES`)
 - Decided against fail2ban / extra rate limiting for the login page:
   code-server itself rate-limits password attempts to 2/minute + 12/hour,
   which is sufficient for personal instances
 
 ## MVP 4 — Run what you build: dev servers & ports
-
+    
 - code-server's built-in port proxy (`/proxy/<port>/`, `/absproxy/<port>/`)
   works — Vite needs `base: '/absproxy/<port>/'` in its config
 - If that gets annoying: mapped port range (e.g. 3000–3010) for the

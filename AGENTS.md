@@ -67,16 +67,18 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 - Port `8080` is mapped only locally (override file). In prod, Traefik
   terminates TLS; the container maps no ports. No extra ports anywhere.
 - Toolchains (currently Node.js 22 + pnpm via NodeSource/corepack, the
-  GitHub CLI via its official apt repo, and Python 3 + pip/venv/pipx via
-  apt + uv via the Astral installer) belong to the image.
+  GitHub CLI via its official apt repo, Python 3 + pip/venv/pipx via
+  apt + uv via the Astral installer, and the .NET 10 SDK via Microsoft's
+  apt feed) belong to the image.
 - The login shell is fish. Generic, shareable shell goodies live in the
   repo's `fish/` directory and are baked into `/etc/fish/` (sourced before
   any user config) — keep them generic; personal config belongs to each
   user's own `~/.config/fish` (persisted via `./data/config`). Tools that
   the shared config references must be installed in the `Dockerfile`. AI CLIs and other fast-moving tools do NOT: they are installed
   at runtime with `npm install -g`, which lands in the persistent `~/.local`
-  thanks to `NPM_CONFIG_PREFIX`. Same for `KIMI_CODE_HOME` and `COREPACK_HOME`
-  (both redirected into `~/.local/share`). When adding a new user-space tool,
+  thanks to `NPM_CONFIG_PREFIX`. Same for `KIMI_CODE_HOME`, `COREPACK_HOME`,
+  `DOTNET_CLI_HOME` and `NUGET_PACKAGES` (all redirected into
+  `~/.local/share`). When adding a new user-space tool,
   make sure its data/config lands in `~/.config` or `~/.local` — anything
   else under `/home/coder` is ephemeral. Tools that hardcode their own home
   directory (like Grok Build's `~/.grok`) get their own `./data/*` bind mount
@@ -94,7 +96,8 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ## Explicit non-goals for the current state
 
 OAuth/SSO, Docker socket access, DinD, mapped dev-port ranges, wildcard DNS,
-further toolchains (Rust, ...), automated base-image updates,
+further toolchains beyond the ones already in the image (Rust, ...),
+automated base-image updates,
 backups, multi-user *within* one instance (multi-instance per person exists
 and is the way).
 These are planned — see `ROADMAP.md` — but must not be implemented early.

@@ -50,6 +50,18 @@ RUN apt-get update \
     && curl -LsSf https://astral.sh/uv/install.sh \
         | env UV_INSTALL_DIR=/usr/local/bin UV_NO_MODIFY_PATH=1 sh
 
+# .NET 10 SDK (current LTS) via Microsoft's apt feed - system level, like
+# Node.js and Python. The repo config package is versioned per Debian
+# release, so it is derived from /etc/os-release (Debian 12 & 13 both work).
+RUN . /etc/os-release \
+    && curl -fsSL "https://packages.microsoft.com/config/debian/$VERSION_ID/packages-microsoft-prod.deb" \
+        -o /tmp/packages-microsoft-prod.deb \
+    && dpkg -i /tmp/packages-microsoft-prod.deb \
+    && rm /tmp/packages-microsoft-prod.deb \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends dotnet-sdk-10.0 \
+    && rm -rf /var/lib/apt/lists/*
+
 # npm global installs land in the persistent home (~/.local is a bind mount),
 # so user-installed tools (Kimi Code, OpenCode, ...) survive image rebuilds
 # and can be updated with plain npm/pnpm - no redeploy needed.
@@ -62,6 +74,15 @@ ENV KIMI_CODE_HOME=/home/coder/.local/share/kimi-code
 
 # Keep the corepack (pnpm/yarn) download cache persistent as well.
 ENV COREPACK_HOME=/home/coder/.local/share/corepack
+
+# Same for .NET: CLI state (first-run marker, dev certs, global tools from
+# `dotnet tool install -g`, which land in $DOTNET_CLI_HOME/.dotnet/tools)
+# and the NuGet package cache must survive container rebuilds.
+ENV DOTNET_CLI_HOME=/home/coder/.local/share/dotnet
+ENV NUGET_PACKAGES=/home/coder/.local/share/nuget/packages
+ENV PATH=/home/coder/.local/share/dotnet/.dotnet/tools:$PATH
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+ENV DOTNET_NOLOGO=1
 
 # Move the global git config into the persistent ~/.config tree, so
 # credential helpers (gh auth setup-git), identity etc. survive rebuilds.
